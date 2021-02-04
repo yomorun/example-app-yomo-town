@@ -184,15 +184,14 @@ const App = () => {
   }, []);
 
   return (
-    <div className="test"
+    <img src="/favicon.ico" className="test"
       style={
         {
           position: "absolute",
           left,
           top
         }
-    }>
-      W/A/S/D to control me </div>
+    } />
   );
 };
 
