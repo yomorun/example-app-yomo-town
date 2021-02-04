@@ -5,21 +5,21 @@ import {map, filter, scan, distinctUntilChanged, takeUntil, startWith, mergeMap}
 
 import './App.css';
 
-// 每次的移动距离（px）
+// Distance per movement (in px)
 const SPEED = 5;
-// 每FPS毫秒刷新一次移动
+// Movements are refreshed every FPS milliseconds
 const FPS = 17;
-// 每次按下按键后多久开始被认为是”按住“
+// How long after KeyPress is considered to be "held"
 const HELD_DOWN_THRESHOLD = 100;
 
-// 与坐标系相关的操作，当前位置、移动方向
+// Operations related to coordinate system: position & direction of movement
 class Vector {
   constructor(x, y) {
     this.x = x;
     this.y = y;
   }
 
-  // 移动位置的计算 = 当前位置.add(移动方向向量)
+  // Calculation of move position = CurrentPosition.add(Move_Direction_Vector)
   add(vec) {
     this.x += vec.x * SPEED;
     this.y += vec.y * SPEED;
@@ -35,16 +35,16 @@ class Vector {
   }
 }
 
-// 四种移动方向的向量
+// Vector of four moving directions
 const dirLeft = new Vector(-1, 0);
 const dirRight = new Vector(1, 0);
 const dirUp = new Vector(0, -1);
 const dirDown = new Vector(0, 1);
 
-// 当前的位置
+// Current position
 const POS = new Vector(0, 0);
 
-// 只接受来自W、A、S、D四个按键的事件
+// Only accepts events from the W, A, S and D buttons
 const keyPressWASD = (e) => {
   switch (e.keyCode) {
     case 87:
@@ -57,7 +57,7 @@ const keyPressWASD = (e) => {
   }
 };
 
-// 将W、A、S、D转化成移动方向的向量
+// Transform W, A, S, D into vectors of moving directions
 const move = (e) => {
   var dir;
   switch (e.keyCode) {
@@ -72,7 +72,7 @@ const move = (e) => {
   return Object.assign(e, {dir});
 };
 
-// TODO：这里应该是通过WebSocket广播自己的位置变化事件的流
+// TODO：Broadcast KeyDown and KeyUp event streams to others in this game room
 const broadcastEvent = (evt) => {
   console.info("Mock WebSocket Broadcast Event:", evt);
 };
@@ -81,7 +81,7 @@ const App = () => {
   const [left, setLeft] = useState(false);
   const [top, setTop] = useState(false);
 
-  // 每次更新位置
+  // Update position with Delta
   const setPos = delta => { // console.info(">>Moving", delta.toString())
     POS.add(delta);
     setLeft(POS.x);
@@ -91,45 +91,45 @@ const App = () => {
   useEffect(() => {
     setPos(new Vector(10, 10));
 
-    // ---------------------- 对键盘事件流的抽象 --------------------
-    // 键盘keyup事件
-    // 当该事件产生时，表示移动结束
-    // -----------------------------------------------------------
+    // ----------- abstraction of the keyboard event stream --------------------
+    // Keyboard `keyup` event
+    // When this event is generated, it indicates the end of the move
+    // -------------------------------------------------------------------------
     const evtKeyUp = fromEvent(document, 'keyup').pipe(map(e => {
       return {evt: "stop", keyCode: e.keyCode}
     }));
   
-    // 键盘keydown事件（注意，要过滤掉Long Press的事件）
-    // 当该事件产生时，表示移动开始
+    // Keyboard `keydown` event (note: filter out the Long Press events)
+    // When this event is generated, it indicates start moving
     const evtKeyDown = fromEvent(document, 'keydown').pipe(filter(e => !e.repeat), map(e => {
       return {evt: "start", keyCode: e.keyCode}
     }));
   
-    // 过滤掉W/A/S/D以外的按键
+    // Filter out keys other than W/A/S/D
     const motion = merge(evtKeyUp, evtKeyDown).pipe(filter(keyPressWASD));
 
-    // --------------- 对于motion的动作流渲染移动过程 ----------------
-    // 注意：motion是对键盘事件的抽象，即本地document的事件，或通过
-    // WebSocket.on('motion')接受到的事件
-    // -----------------------------------------------------------
+    // --------------- for motion's action stream rendering movement process ----------------
+    // Note: motion is an abstraction of keyboard events, i.e. events from the local document, 
+    // or events received via WebSocket.on('motion') received events
+    // --------------------------------------------------------------------------------------
     
-    // 从motion中获取KeyUp事件，表示松开按键，即停止移动
+    // Get the KeyUp event from motion, which means release the key, stop moving
     const stop$ = motion.pipe(filter(x => x.evt == "stop"))
 
-    // 从motion中获取KeyDown事件，表示按下按键，即开始移动
+    // Get the KeyDown event from motion, which means the key is pressed, start moving
     const start$ = motion.pipe(filter(x => x.evt == "start"), map(move));
 
-    // position的变化规则是：当前的position，加上方向向量
+    // Compute position changed every movement
     const stepMove = (currentPosition, direction) => {
       return currentPosition.add(direction);
     }
   
-    // 所有的键盘事件流通过WebSocket发送给YoMo广播
+    // Keyboard events are broadcast to YoMo via WebSocket
     merge(start$, stop$).subscribe(broadcastEvent);
 
     // ------------------------------------------------------------------------------------------
-    // 情况1：
-    // 每按一下按键，都要移动一次
+    // Situation 1：
+    // Move every time when keydown
     // -------------------------------------------------------------------------------------------
 
     // 每一次的start事件对应着物体移动，position不断变化的事件流
@@ -139,27 +139,29 @@ const App = () => {
     );
 
     // ------------------------------------------------------------------------------------------
-    // 情况2：
-    // 如果D键一直被按住，应该是在KeyDown事件触发时，先向右移动一次，然后每200ms都向右移动一次，直到KeyUp事件发生
+    // Situation 2：
+    // If the `D` key is always held down, it should move to the right once when the KeyDown event 
+    // is triggered, wait 200ms and then triggered every 17ms, until the KeyUp event occurs
     // -------------------------------------------------------------------------------------------
 
-    // 当前的方向
+    // Initial the current direcdtion
     var CURRENT_DIRECTION = new Vector(1, 0);
 
-    // 方向变化的流
+    // Stream of directions
     var direction$ = motion.pipe(map(move), map(p => p.dir), distinctUntilChanged());
     direction$.subscribe(d => {
       console.log("direction change to ->", d.toString());
       CURRENT_DIRECTION = d;
     });
 
-    // 当按键按住时，延迟HELD_DOWN_THRESHOLD时间后，每FPS更新一次position
+    // When the button is pressed and held, after delaying HELD_DOWN_THRESHOLD time, 
+    // the position is updated once per FPS
     var pos2$ = start$.pipe(
       mergeMap(_ => {
-        // 先延迟HELD_DOWN_THRESHOLD时间后，每FPS触发一次事件
+        // After first delaying HELD_DOWN_THRESHOLD time, the event is triggered once per FPS
         return timer(HELD_DOWN_THRESHOLD, FPS).pipe(
           map(_ => CURRENT_DIRECTION),
-          // complete inner timer on keyUp event
+          // Complete inner timer on keyUp event
           takeUntil(stop$)
         );
       }),
@@ -167,17 +169,18 @@ const App = () => {
     )
 
     // ------------------------------------------------------------------------------------------
-    // 两种引起position变化的情况merge起来，每次position变化都重绘UI
+    // The two cases of position change are merged together, and the UI is redrawn each time 
+    // the position changes
     // -------------------------------------------------------------------------------------------
 
-    // 重绘界面
+    // Redraw UI
     const renderPosition = p => { 
       console.log("pos:", p.toString())
       setLeft(p.x);
       setTop(p.y);
     }
 
-    // 订阅position变化的事件流，每次变化时都更新位置
+    // Subscribe to the event stream for position changes and update the position each time it changes
     merge(pos1$, pos2$).subscribe(renderPosition)
     
     return() => {};
