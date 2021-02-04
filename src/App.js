@@ -132,7 +132,7 @@ const App = () => {
     // Move every time when keydown
     // -------------------------------------------------------------------------------------------
 
-    // 每一次的start事件对应着物体移动，position不断变化的事件流
+    // Each `keydown` event corresponds to the div movement, and the position is a constantly changing stream of events
     var pos1$ = start$.pipe(
       map(x => x.dir), 
       scan(stepMove, POS)
