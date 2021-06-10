@@ -8,7 +8,7 @@ Online Preview: [https://yomo-town.vercel.app/](https://yomo-town.vercel.app/)
 
 ## Local development
 
-`yarn start`
+`yarn dev`
 
 ## Remote-Control in FRP way by YoMo
 

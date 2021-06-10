@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .font-light-purple {
+    color: rgba(182, 168, 245, 1);
+  }
+
+  .background-light-purple {
+    background-color: rgba(182, 168, 245, 1);
+  }
+
+  .font-purple {
+    color: #5746D7;
+  }
+
+  .background-purple {
+    background-color: #5746D7;
+  }
+
+  .font-dark-purple {
+    color: #150438;
+  }
+
+  .background-dark-purple {
+    background-color: #150438;
+  }
+
+  .background-dark {
+    background-color: #0A001D;
+  }
+
+  .hover-text-gray:hover {
+    color: rgba(209, 213, 219, 1);
+  }
+}
+
+body {
+  background-color: #0A001D;
+  font-family: 'Exo 2', sans-serif;
+}
