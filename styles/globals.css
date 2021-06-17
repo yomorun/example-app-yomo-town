@@ -30,9 +30,15 @@
   .background-dark {
     background-color: #0A001D;
   }
-
+  
   .hover-text-gray:hover {
     color: rgba(209, 213, 219, 1);
+  }
+
+  .oneline-overflow-elision {
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
   }
 }
 
