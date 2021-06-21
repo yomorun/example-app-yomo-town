@@ -3,6 +3,38 @@ import cn from 'classnames'
 
 const DeviceSettings = () => {
 
+    const [devices, setDevices] = useState({
+        videoinput: [],
+        audioinput: [],
+        audiooutput: []
+    })
+
+    useEffect(() => {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            console.log('不支持 enumerateDevices() .')
+            return
+        }
+
+        // List cameras and microphones
+        navigator.mediaDevices.enumerateDevices()
+            .then(data => {
+                const devices = {
+                    videoinput: [],
+                    audioinput: [],
+                    audiooutput: []
+                }
+
+                data.forEach(device => {
+                    devices[device.kind].push(device)
+                })
+
+                setDevices(devices)
+            })
+            .catch(function (err) {
+                console.log(err.name + ': ' + err.message)
+            })
+    }, [])
+
     return (
         <div className='flex flex-col'>
             <div className='h-10 flex items-center px-2 rounded-3xl bg-gray-200'>
@@ -21,7 +53,11 @@ const DeviceSettings = () => {
                     />
                 </svg>
                 <select className='ml-1 w-64 text-sm text-black bg-transparent outline-none'>
-                    <option value='e77c122ece9cf14bb1798de21a5c2523e71cec97dac6552a719a2d4e7a850428'>FaceTime高清摄像头（内建） (05ac:8514)</option>
+                    {
+                        devices.videoinput.map(item => (
+                            <option value={item.deviceId} key={item.deviceId}>{item.label}</option>
+                        ))
+                    }
                 </select>
             </div>
 
@@ -38,10 +74,15 @@ const DeviceSettings = () => {
                     <path stroke='currentColor' strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.5' d='M12 17.75V19.25' />
                 </svg>
                 <select className='ml-1 w-64 text-sm text-black bg-transparent outline-none'>
-                    <option data-v-cbad9310='' value='default'> 默认 - MacBook Pro麦克风 (Built-in) </option>
-                    <option data-v-cbad9310='' value='e1c63cbd39b42f220a4e0e44c294a5c2743677211fd6e7797d7d675f7a9c9b34'> MacBook Pro麦克风 (Built-in) </option>
+                    {
+                        devices.audioinput.map(item => (
+                            <option value={item.deviceId} key={item.deviceId}>{item.label}</option>
+                        ))
+                    }
                 </select>
             </div>
+
+            <audio id='' />
 
             <div className='mt-5 h-10 flex items-center px-2 rounded-3xl bg-gray-200'>
                 <svg
@@ -59,8 +100,14 @@ const DeviceSettings = () => {
                         d='M17.25 4.75L10.5 8.75H7.75C7.19772 8.75 6.75 9.19772 6.75 9.75V14.25C6.75 14.8023 7.19772 15.25 7.75 15.25H10.5L17.25 19.25V4.75Z'
                     />
                 </svg>
-                <div className='ml-1 w-48 text-sm text-black oneline-overflow-elision'>默认 - MacBook Pro扬声器 (Built-in)</div>
-
+                <select className='ml-1 w-64 text-sm text-black bg-transparent outline-none'>
+                    {
+                        devices.audiooutput.map(item => (
+                            <option value={item.deviceId} key={item.deviceId}>{item.label}</option>
+                        ))
+                    }
+                </select>
+                {/* <div className='ml-1 w-48 text-sm text-black oneline-overflow-elision'>默认 - MacBook Pro扬声器 (Built-in)</div> */}
             </div>
         </div>
     )
