@@ -31,7 +31,6 @@ export default function Home() {
                 onLoadComplete: () => {
                     setTimeout(() => {
                         setShowLoading(false)
-
                         scene.socket.emit(
                             'join',
                             JSON.stringify({
