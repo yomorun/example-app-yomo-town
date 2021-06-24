@@ -1,4 +1,4 @@
-import { NextSeo, ArticleJsonLd } from 'next-seo'
+import { NextSeo } from 'next-seo'
 
 export const SEO = {
     title: process.env.NEXT_PUBLIC_TITLE,

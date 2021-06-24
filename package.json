@@ -11,10 +11,11 @@
     "classnames": "^2.3.1",
     "next": "10.2.3",
     "next-seo": "^4.24.0",
-    "next-themes": "^0.0.14",
-    "nprogress": "^0.2.0",
+    "phaser": "3.55.2",
+    "phaser3-rex-plugins": "^1.1.53",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-draggable": "^4.4.3",
     "rxjs": "^7.1.0",
     "socket.io-client": "2.3.0"
   },
