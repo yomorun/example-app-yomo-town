@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Modal from 'components/Modal'
 import PreviewWebcam from 'components/PreviewWebcam'
 import CurrentPlayers from 'components/CurrentPlayers'
+import Loading from 'components/Loading'
 
 let scene
 
@@ -9,33 +10,54 @@ export default function Home() {
     const [showNameForm, setShowNameForm] = useState(true)
     const [playerName, setPlayerName] = useState('')
     const [players, setPlayers] = useState([])
+    const [showLoading, setShowLoading] = useState(false)
 
     const handleChangeName = useCallback(e => {
         setPlayerName(e.target.value)
     }, [])
 
     const handleClickJoin = useCallback(e => {
-        if (playerName && scene) {
-            scene.socket.emit(
-                'join',
-                JSON.stringify({
-                    name: playerName,
-                    avatarUrl: '',
-                    x: window.getViewportSize.width / 2,
-                    y: window.getViewportSize.height / 2
-                })
-            )
+        if (playerName) {
+            setShowNameForm(false)
+            setShowLoading(true)
 
-            scene.socket.on('join', msg => {
-                setShowNameForm(false)
+            const { Game, Scene } = require('lib/scene')
 
-                localStorage.setItem(
-                    'LOCALPLAYER',
-                    JSON.stringify({
-                        name: playerName,
-                        avatarUrl: ''
-                    })
-                )
+            scene = new Scene({
+                socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL,
+                currentPlayersCallback: players => {
+                    setPlayers(players)
+                },
+                onLoadComplete: () => {
+                    setTimeout(() => {
+                        setShowLoading(false)
+
+                        scene.socket.emit(
+                            'join',
+                            JSON.stringify({
+                                name: playerName,
+                                avatarUrl: '',
+                                x: window.getViewportSize.width / 2,
+                                y: window.getViewportSize.height / 2
+                            })
+                        )
+
+                        scene.socket.on('join', msg => {
+                            localStorage.setItem(
+                                'LOCALPLAYER',
+                                JSON.stringify({
+                                    name: playerName,
+                                    avatarUrl: ''
+                                })
+                            )
+                        })
+                    }, 3000)
+                }
+            })
+
+            Game.create({
+                scene,
+                canvasParent: 'scene'
             })
         }
     }, [playerName])
@@ -47,22 +69,8 @@ export default function Home() {
             setPlayerName(data.name)
         }
 
-        const { Game, Scene } = require('lib/scene')
-
-        scene = new Scene({
-            socketUrl: process.env.NEXT_PUBLIC_SOCKET_URL,
-            currentPlayersCallback: players => {
-                setPlayers(players)
-            }
-        })
-
-        Game.create({
-            scene,
-            canvasParent: 'scene'
-        })
-
         return () => {
-            scene.socket.disconnect()
+            scene && scene.socket.disconnect()
         }
     }, [])
 
@@ -71,6 +79,11 @@ export default function Home() {
             <div id='scene'></div>
             <CurrentPlayers data={players} />
             <PreviewWebcam />
+            {showLoading && (
+                <div className='fixed left-0 top-0 w-full h-full z-50 flex justify-center items-center bg-gray-900'>
+                    <Loading /> <span className='ml-5 text-white'>Loading...</span>
+                </div>
+            )}
             <Modal
                 show={showNameForm}
             >
