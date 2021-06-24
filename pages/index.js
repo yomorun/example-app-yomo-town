@@ -20,7 +20,7 @@ export default function Home() {
                 'join',
                 JSON.stringify({
                     name: playerName,
-                    avatarUrl: './images/logo.png',
+                    avatarUrl: '',
                     x: window.getViewportSize.width / 2,
                     y: window.getViewportSize.height / 2
                 })
@@ -33,7 +33,7 @@ export default function Home() {
                     'LOCALPLAYER',
                     JSON.stringify({
                         name: playerName,
-                        avatarUrl: './images/logo.png'
+                        avatarUrl: ''
                     })
                 )
             })
