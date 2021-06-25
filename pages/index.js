@@ -29,28 +29,27 @@ export default function Home() {
                     setPlayers(players)
                 },
                 onLoadComplete: () => {
-                    setTimeout(() => {
-                        setShowLoading(false)
-                        scene.socket.emit(
-                            'join',
+                    setShowLoading(false)
+
+                    scene.socket.emit(
+                        'join',
+                        JSON.stringify({
+                            name: playerName,
+                            avatarUrl: '',
+                            x: window.getViewportSize.width / 2,
+                            y: window.getViewportSize.height / 2
+                        })
+                    )
+
+                    scene.socket.on('join', msg => {
+                        localStorage.setItem(
+                            'LOCALPLAYER',
                             JSON.stringify({
                                 name: playerName,
-                                avatarUrl: '',
-                                x: window.getViewportSize.width / 2,
-                                y: window.getViewportSize.height / 2
+                                avatarUrl: ''
                             })
                         )
-
-                        scene.socket.on('join', msg => {
-                            localStorage.setItem(
-                                'LOCALPLAYER',
-                                JSON.stringify({
-                                    name: playerName,
-                                    avatarUrl: ''
-                                })
-                            )
-                        })
-                    }, 3000)
+                    })
                 }
             })
 
