@@ -1,7 +1,7 @@
-## vhq-frontend-nextjs
+## Open-source Virtual HQ with Geo-Distributed-System Tech Stack
 
-Have you tried [gather.town](https://gather.town) or [TeamFlow](https://www.teamflowhq.com/) ? 
-If you wanna have a try to build one by your self, this is a VHQ example built with [YoMo](https://github.com/yomorun/yomo) + [Next.js](https://github.com/vercel/next.js).
+Have you ever tried [gather.town](https://gather.town) or [TeamFlow](https://www.teamflowhq.com/)? 
+If you wanna have a try to build one by yourself, this is a VHQ example built with [YoMo](https://github.com/yomorun/yomo) + [Next.js](https://github.com/vercel/next.js).
 
 Online Preview: [https://vhq-nextjs.yomo.run/](https://vhq-nextjs.yomo.run/)
 
@@ -9,8 +9,10 @@ Online Preview: [https://vhq-nextjs.yomo.run/](https://vhq-nextjs.yomo.run/)
 
 `yarn dev`
 
-## Remote-Control in FRP way by YoMo
+## Tech Stacks
 
-[all about YoMo can be found here](https://github.com/yomorun/yomo)
-
-
+- [Vercel - Frontend Deployment](https://vercel.com)
+- [Next.js - Frontend](https://nextjs.org)
+- [Agora - Video/Audio](https://agora.io)
+- [Macrometa - Geo-distributed Database](https://macrometa.dev/)
+- [YoMo - Geo-distributed Presence server](https://github.com/yomorun/yomo)
